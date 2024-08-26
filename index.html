@@ -28,3 +28,21 @@
 
 </body>
 </html>
+
+<script>
+  function sendUserAction(action, userId) {
+    fetch('/api/user-action', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ action, userId }),
+    })
+    .then(response => response.text())
+    .then(data => console.log(data))
+    .catch(error => console.error('Erro:', error));
+  }
+
+  // Exemplo de como chamar a função
+  sendUserAction('Usuário clicou no botão de envio', '123456');
+</script>
