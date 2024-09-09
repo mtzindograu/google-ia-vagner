@@ -1,68 +1,58 @@
-
-const { MongoClient, ServerApiVersion } = require('mongodb');
-const uri = "mongodb+srv://mateus:<db_password>@cluster0.9qltb.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
-
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  }
-});
-
-async function run() {
-  try {
-    // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
-    // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
-  } finally {
-    // Ensures that the client will close when you finish/error
-    await client.close();
-  }
-}
-run().catch(console.dir);
-
+// Importando pacotes
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 
-// Conectar ao MongoDB Atlas
-mongoose.connect('mongodb+srv://<username>:<password>@cluster0.mongodb.net/chatbotDB', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
-
+// Configurando o app
 const app = express();
+const port = process.env.PORT || 3000;
+
+// Middleware
 app.use(bodyParser.json());
+app.use(cors());
 
-// Definir um esquema e modelo para o histórico de ações
-const userActionSchema = new mongoose.Schema({
-  action: String,
-  timestamp: { type: Date, default: Date.now },
-  userId: String,
+// Conectando ao MongoDB (substitua pelo seu URI do MongoDB Atlas)
+const mongoURI = 'mongodb+srv://<seu-usuario>:<sua-senha>@<seu-cluster>.mongodb.net/chatbotDB?retryWrites=true&w=majority';
+mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(() => console.log('Conectado ao MongoDB Atlas'))
+    .catch((err) => console.error('Erro ao conectar ao MongoDB', err));
+
+// Definindo o modelo do MongoDB
+const historySchema = new mongoose.Schema({
+    userId: String,
+    action: String,
+    timestamp: { type: Date, default: Date.now }
 });
 
-const UserAction = mongoose.model('UserAction', userActionSchema);
+const History = mongoose.model('History', historySchema);
 
-// Endpoint para registrar a ação do usuário
-app.post('/api/user-action', async (req, res) => {
-  const { action, userId } = req.body;
+// Rota para salvar o histórico de ações
+app.post('/save-history', async (req, res) => {
+    const { userId, action } = req.body;
 
-  try {
-    const newUserAction = new UserAction({ action, userId });
-    await newUserAction.save();
-    res.status(201).send('Ação registrada com sucesso!');
-  } catch (error) {
-    res.status(500).send('Erro ao registrar ação');
-  }
+    try {
+        const newHistory = new History({ userId, action });
+        await newHistory.save();
+        res.status(200).send('Histórico salvo com sucesso!');
+    } catch (error) {
+        res.status(500).send('Erro ao salvar o histórico: ' + error.message);
+    }
 });
 
-// Iniciar o servidor
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
+// Rota para exibir o histórico de ações
+app.get('/get-history/:userId', async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const history = await History.find({ userId });
+        res.status(200).json(history);
+    } catch (error) {
+        res.status(500).send('Erro ao buscar histórico: ' + error.message);
+    }
 });
 
+// Iniciando o servidor
+app.listen(port, () => {
+    console.log(`Servidor rodando na porta ${port}`);
+});

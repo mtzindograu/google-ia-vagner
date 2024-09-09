@@ -1,11 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="shortcut icon" href="img/bola-1.png"/>
-  <title>Chat IA de Futebol.</title>
+  <title>Chat IA de tudo.</title>
   <link rel="stylesheet" href="style.css">
+  
+  <!-- Importando a biblioteca da Google Generative AI -->
   <script type="importmap">
     {
       "imports": {
@@ -13,36 +15,25 @@
       }
     }
   </script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/markdown.js/0.5.0/markdown.min.js" integrity="sha512-kaDP6dcDG3+X87m9SnhyJzwBMKrYnd2tLJjGdBrZ9yEL8Zcl2iJRsPwylLkbd2g3QC5S8efV3sgwI5r73U0HnA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <!-- Biblioteca para renderizar markdown -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/markdown.js/0.5.0/markdown.min.js" 
+          integrity="sha512-kaDP6dcDG3+X87m9SnhyJzwBMKrYnd2tLJjGdBrZ9yEL8Zcl2iJRsPwylLkbd2g3QC5S8efV3sgwI5r73U0HnA==" 
+          crossorigin="anonymous" 
+          referrerpolicy="no-referrer">
+  </script>
 </head>
 <body>
-  <h2>Chat IA de Futebol!!! 
-  </h2>
-  <h3>Faça sua pergunta sobre futebol para nossa IA!!!</h3>
+  <h2>Chat de Tudo que você quiser!!!</h2>
+  <h3>Faça sua pergunta para nossa IA!!!</h3>
   <main>
     <div id="resposta-da-ia"></div>
     <textarea placeholder="Digite uma mensagem..."></textarea>
     <input type="submit" name="mensagem" id="mensagem">
   </main>
+  
+  <!-- Importando o script principal -->
   <script type="module" src="script.js"></script>
 
 </body>
 </html>
-
-<script>
-  function sendUserAction(action, userId) {
-    fetch('/api/user-action', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ action, userId }),
-    })
-    .then(response => response.text())
-    .then(data => console.log(data))
-    .catch(error => console.error('Erro:', error));
-  }
-
-  // Exemplo de como chamar a função
-  sendUserAction('Usuário clicou no botão de envio', '123456');
-</script>

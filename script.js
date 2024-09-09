@@ -1,22 +1,40 @@
+// Importando a biblioteca da Google Generative AI
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+// Selecionando os elementos do DOM
 const respostaDiv = document.querySelector("#resposta-da-ia");
 const textarea = document.querySelector("textarea");
 const submit = document.querySelector("input[type=submit]");
 
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
+// Chave da API do Google Generative AI
 const API_KEY = "AIzaSyDw7wzUU8n-LxAeofoUL1DMqSRFQNIejjQ";
 
+// Inicializando o cliente Google Generative AI
 const genAI = new GoogleGenerativeAI(API_KEY);
 
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", systemInstruction: "Você deve ser um especialista em tudo que envolve o futebol, respondendo a perguntas sobre times, clubes, seleções, fatos históricos, mercado de transferências, preços de acessórios e muito mais. Ele precisa entender linguagem natural e responder de forma personalizada, criando um diálogo fluido",});
+// Função para obter o modelo e iniciar a conversa com a IA
+async function iniciarChat() {
+  try {
+    const model = await genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const chat = await model.startChat();
+    return chat;
+  } catch (error) {
+    console.error("Erro ao iniciar o chat com a IA:", error);
+  }
+}
 
 submit.addEventListener("click", async () => {
-  if(textarea.value.trim().length == 0) {
+  if (textarea.value.trim().length === 0) {
     return;
   }
-  console.log("foi")
-  const result = await model.generateContent(textarea.value);
-  const response = await result.response;
-  const text = response.text();
-  respostaDiv.innerHTML = markdown.toHTML(text);
-})
+
+  try {
+    const chat = await iniciarChat();
+    const result = await chat.sendMessage(textarea.value);
+    const response = await result.response.text(); // Corrigido para receber o texto diretamente
+    respostaDiv.innerHTML = markdown.toHTML(response);
+  } catch (error) {
+    console.error("Erro ao enviar mensagem para IA:", error);
+    respostaDiv.innerHTML = "<p>Erro ao obter a resposta. Tente novamente mais tarde.</p>";
+  }
+});
