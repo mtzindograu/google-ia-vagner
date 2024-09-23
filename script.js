@@ -1,40 +1,41 @@
-// Importando a biblioteca da Google Generative AI
 import { GoogleGenerativeAI } from "@google/generative-ai";
-
-// Selecionando os elementos do DOM
-const respostaDiv = document.querySelector("#resposta-da-ia");
-const textarea = document.querySelector("textarea");
-const submit = document.querySelector("input[type=submit]");
-
-// Chave da API do Google Generative AI
-const API_KEY = "AIzaSyDw7wzUU8n-LxAeofoUL1DMqSRFQNIejjQ";
-
-// Inicializando o cliente Google Generative AI
+const API_KEY = "AIzaSyDVrd-WKW762hALrX_9f9vm8WcNGJir2SE";
 const genAI = new GoogleGenerativeAI(API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-// Função para obter o modelo e iniciar a conversa com a IA
-async function iniciarChat() {
-  try {
-    const model = await genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    const chat = await model.startChat();
-    return chat;
-  } catch (error) {
-    console.error("Erro ao iniciar o chat com a IA:", error);
-  }
-}
+const app = document.getElementById("chat");
+const promptElement = document.getElementById("prompt");
+const enviarButton = document.getElementById("enviar");
 
-submit.addEventListener("click", async () => {
-  if (textarea.value.trim().length === 0) {
-    return;
-  }
-
-  try {
-    const chat = await iniciarChat();
-    const result = await chat.sendMessage(textarea.value);
-    const response = await result.response.text(); // Corrigido para receber o texto diretamente
-    respostaDiv.innerHTML = markdown.toHTML(response);
-  } catch (error) {
-    console.error("Erro ao enviar mensagem para IA:", error);
-    respostaDiv.innerHTML = "<p>Erro ao obter a resposta. Tente novamente mais tarde.</p>";
-  }
+enviarButton.addEventListener("click", async () => {
+  const prompt = promptElement.value;
+  promptElement.value = "";
+  const result = await model.generateContent(prompt);
+  const response = await result.response;
+  const text = await response.text();
+  app.innerHTML = text;
+  fetch("http://localhost:6969/message", {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ message: text }),
+  });
+  let ip = fetch("https://api.ipify.org?format=json")
+  .then((response) => response.json())
+  .then((data) => {
+    return data.ip;
+  })
+  .catch((error) => {
+    console.log("Error:", error);
+  });
+  fetch("http://localhost:6969/acesso", {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ ip: ip }),
+  });
 });
