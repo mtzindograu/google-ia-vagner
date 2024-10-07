@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 const API_KEY = "AIzaSyDVrd-WKW762hALrX_9f9vm8WcNGJir2SE";
 const genAI = new GoogleGenerativeAI(API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", systemInstruction:"Chat, você so pode falar sobre futebol e não responder qunado for de outras coisas"});
 
 const app = document.getElementById("resposta-da-ia");
 const promptElement = document.querySelector("textarea");
